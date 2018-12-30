@@ -1,5 +1,7 @@
 package com.example.shad0w.quickcalculation;
 
+import android.content.Intent;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -12,15 +14,21 @@ import java.text.DecimalFormat;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     int score=0;
-    TextView first,operator,second;
+    int unanswer=0;
+    int questionasked=1;
+    int maxquestion=20;
+    TextView first,operator,second,timeview;
     Button A,B,C,D;
     int ans=0;
     String t;
     DecimalFormat df;
+    CountDownTimer mCountDownTimer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        timeview=findViewById(R.id.time);
         A=findViewById(R.id.A);
         A.setOnClickListener(this);
         B=findViewById(R.id.B);
@@ -33,11 +41,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         second=findViewById(R.id.second);
         operator=findViewById(R.id.operator);
         df=new DecimalFormat("###.##");
+        starTimer();
         fillValue();
 
     }
 
     private void fillValue() {
+        if(questionasked>maxquestion)
+            showscore();
+        questionasked++;
         int a=(int)(Math.random() * 50 + 1);
         int b=(int)(Math.random() * 50 + 1);
         int op=(int)(Math.random() * 4 + 1);
@@ -59,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 default:
                     Toast.makeText(this,op+"",Toast.LENGTH_SHORT).show();
         }
-        //Toast.makeText(this,a+" "+operatorcharter+" "+b+" "+ans+" "+buttonoption,Toast.LENGTH_LONG).show();
+        Toast.makeText(this,a+" "+operatorcharter+" "+b+" "+ans+" "+buttonoption,Toast.LENGTH_LONG).show();
         operator.setText(operatorcharter+"");
         first.setText(a+"");
         second.setText(b+"");
@@ -94,7 +106,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else if(i==4)
             D.setText(temp1+"");
     }
+        mCountDownTimer.start();
+    }
 
+    private void showscore() {
+        Intent i=new Intent(this,final_activity.class);
+        i.putExtra(Contact.maxquestion,maxquestion);
+        i.putExtra(Contact.score,score);
+        i.putExtra(Contact.unanswer,unanswer);
+        finish();
+        startActivity(i);
     }
 
     @Override
@@ -104,6 +125,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(clickbuttonvalue.equals(t))
             score++;
         Toast.makeText(this,score+"  "+clickbuttonvalue   ,Toast.LENGTH_LONG).show();
+        mCountDownTimer.cancel();
         fillValue();
+    }
+
+
+    public void starTimer() {
+      mCountDownTimer=  new CountDownTimer(10000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                timeview.setText("seconds remaining: " + millisUntilFinished / 1000);
+            }
+
+            public void onFinish() {
+                unanswer++;
+                fillValue();
+            }
+
+        };
     }
 }
